@@ -1,0 +1,95 @@
+{#**
+ * 2007-2018 PrestaShop
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/OSL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2007-2018 PrestaShop SA
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * International Registered Trademark & Property of PrestaShop SA
+ *#}
+{% extends 'PrestaShopBundle:Admin/Translations:overview.html.twig' %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+
+        var flag = true;
+        $('body').on('DOMNodeInserted','.content-div #app .col-sm-9.card' ,function(e) {
+            if(flag === true){
+                flag=false;
+                var form = $('.translations-wrapper .translations-catalog form div.form-group',this);
+                var divToAllTranslate= $(this).find('div.row').children('div.col-sm-12').has('button.btn');
+                divToAllTranslate.append('<a class="btn float-sm-right btn-outline-primary translateAllString">Tout Traduire</a>');
+                $('.translateAllString').on('click',function () {
+                    $('.translateString').trigger('click');
+                })
+                $(form).each(function () {
+                    $(this).append('<a class="btn mt-3 float-sm-right btn-outline-secondary translateString">Traduire</a>');
+                    var itemToTranslate = $(this).find('a');
+                    $(itemToTranslate).on('click',function (e) {
+                        var stringToTranslate = $(this).siblings('label').text();
+                        var apikey = {{ api_key }};
+                        var destReturnTranslate = $(this).siblings('textarea');
+                        var destLang = '{{ app.request.query.get('lang') }}';
+                        var urlApi ='https://translation.googleapis.com/language/translate/v2?q='+stringToTranslate+'&target='+destLang+'&format=html&key=' + apikey;
+                        $.ajax({
+                            type : 'GET',
+                            //url: $(this).attr('href'),
+                            url: urlApi,
+                        }).done(function(results) {
+                            var decoded = results.data.translations[0].translatedText.replace(/&#39;/g,"'");
+                            $(destReturnTranslate).val(decoded);
+                        }).fail(function () {
+                            console.log('fail');
+                        });
+                        return false;
+                    })
+                })
+            }
+        });
+        $('body').on('click','.page-link',function () {
+            flag=true;
+        });
+        $('body').on('click','.tree-label',function () {
+            flag=true;
+        });
+
+        var data = {
+            baseUrl: '{{ app.request.getBasePath() }}',
+            locale: '{{ app.request.query.get('locale') }}',
+            type: '{{ app.request.query.get('type') }}',
+            currentTheme: {{ theme.name|json_encode|raw }},
+            selected: '{{ app.request.query.get('selected') }}',
+            domainsTreeUrl: '{{ url('api_translation_domains_tree', {
+                'lang' : app.request.query.get('lang'),
+                'type' : app.request.query.get('type'),
+                'selected': app.request.query.get('selected')
+            }) }}',
+            translationUrl: '{{ url('api_i18n_translations_list', {'page' : 'international'}) }}',
+            internationalUrl: '{{ getAdminLink("AdminLocalization")|raw }}',
+            translationsUrl: '{{ getAdminLink("AdminTranslations")|raw }}'
+        }
+    </script>
+
+    {% if webpack_server %}
+        <script src="http://localhost:8080/translations.bundle.js"></script>
+    {% else %}
+        <script src="{{ asset('themes/new-theme/public/translations.bundle.js') }}"></script>
+    {% endif %}
+
+{% endblock %}

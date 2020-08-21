@@ -1,0 +1,21 @@
+{
+
+  "description": "Apply CSS to pages.",
+  "manifest_version": 2,
+  "name": "apply-css",
+  "version": "1.0",
+  "homepage_url": "https://github.com/mdn/webextensions-examples/tree/master/apply-css",
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["algofactorystyle.css"]
+    }
+  ],
+  "permissions": [
+    "<all_urls>",
+    "activeTab",
+    "tabs"
+  ]
+
+}

@@ -1,0 +1,39 @@
+version: '2'
+
+services:
+  #  nginx:
+  #    image: bitnami/nginx:latest
+  #    ports:
+  #      - 80:8080
+  #    volumes:
+  #      - ./nginx-vhost/acme.conf:/bitnami/nginx/conf/server_blocks/acme.conf
+  #      - .:/app
+  apache:
+    image: bitnami/apache:latest
+    user: root
+    ports:
+      - 80:8080
+    volumes:
+      - ./apache-vhost/myapp.conf:/vhosts/myapp.conf:ro
+      - .:/app
+
+  db:
+    image: mariadb:10
+    container_name: acme_presta_db
+    ports:
+      - 3320:3306
+    environment:
+      MYSQL_DATABASE: "prestashop"
+      MYSQL_ROOT_PASSWORD: "root"
+    volumes:
+      - ./db:/var/lib/mysql
+
+  php-fpm:
+    image: bitnami/php-fpm:7.2
+    container_name: acme__presta_app
+    volumes:
+      - .:/app
+
+volumes:
+  mariadb_data:
+    driver: local

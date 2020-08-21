@@ -1,0 +1,10 @@
+{
+    "config": {
+        "vendor-dir": "libs"
+    },
+
+    "require": {
+        "google/cloud": "^0.92.0",
+        "google/cloud-translate": "^1.2"
+    }
+}
